@@ -1,0 +1,50 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: CloudFormation
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Publish
+      run: dotnet publish --no-self-contained --runtime linux-x64 --configuration Release --output ./artifact/publish ./AWSCloudFormation/src/AWSCloudFormation/AWSCloudFormation.csproj
+    
+    - name: Install zip
+      uses: montudor/action-zip@v1
+    - name: Zip output
+      run: zip -qq -r ../cloudformation-lambda.zip .
+      working-directory: /artifact/publish
+
+    - name: Copy Cloudformation Template
+      run: cp ./AWSCloudFormation/deployment.yaml .artifact/deployment.yaml
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cloudformation-lambda
+        path: ./artifact
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4.1.0
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+     
+    - name: Uplod zip to S3 bucket
+      run: aws s3 cp ./artifact/cloudformation-lambda.zip s3://cloudformation-lambda-demo-package
+     
+        
