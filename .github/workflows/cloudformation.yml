@@ -93,6 +93,6 @@ jobs:
         - name: Deploy to AWS CloudFormation
           uses: aws-actions/aws-cloudformation-github-deploy@v1
           with:
-            name: cloudformation-lambda-demo
+            name: cloudformation-lambda-demo-PROD
             template: artifact/deployment.yaml
             parameter-overrides: "Environment="
