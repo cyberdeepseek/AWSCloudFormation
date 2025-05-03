@@ -5,6 +5,11 @@ Parameters:
     Type: String
     Description: Environment name
 Resources:
+  sqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "cloudformation-lambda-demo-queue-${Environment}"
+
   lambdaFunctionIamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -26,6 +31,27 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "*"
+
+        - PolicyName: "allow-sqs-access"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - sqs:ChangeMessageVisibility
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt sqsQueue.Arn
+
+    LambdaFunctionEventSourceMapping:
+      Type: AWS::Lambda::EventSourceMapping
+      Properties:
+        BatchSize: 10
+        Enabled: true
+        EventSourceArn: !GetAtt sqsQueue.Arn
+        FunctionName: !GetAtt lambdaFunction.Arn
+
   lambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
