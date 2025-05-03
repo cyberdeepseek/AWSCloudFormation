@@ -69,5 +69,5 @@ jobs:
           uses: aws-actions/aws-cloudformation-github-deploy@v1
           with:
             name: cloudformation-lambda-demo
-            template: ./artifacts/deployment.yaml
+            template: artifact/deployment.yaml
             parameter-overrides: "Environment=-Test"
