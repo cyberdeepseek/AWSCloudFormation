@@ -56,7 +56,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: "CloudFormation Lambda with Sqs Demo"
-      FunctionName: !Sub "cloudformation-lambda-demo-${Environment}"
+      FunctionName: !Sub "cloudformation-lambda-demo${Environment}"
       Handler: AWSCloudFormation::AWSCloudFormation.Function::FunctionHandler
       MemorySize: 128
       Role: !GetAtt lambdaFunctionIamRole.Arn
